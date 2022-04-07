@@ -93,3 +93,14 @@ class DexProtocol(Protocol):
 
         return await wallet.call_contract_with_token(pair_contract, msg, from_token, amount)
 
+    @classmethod
+    def create(cls, protocol_name, pairs_identifier):
+        class CustomDexProtocol(cls):
+            name = protocol_name
+            PAIRS_IDENTIFIER = pairs_identifier
+
+            def __repr__(self):
+                return "CustomDexProtocol(%s)" % self.name
+
+        return CustomDexProtocol()
+

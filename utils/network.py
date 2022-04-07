@@ -31,10 +31,14 @@ class Mainnet(TerraNetwork):
         'ASTROPORT_PAIRS': {
             ('LUNA', 'bLUNA'): 'terra1j66jatn3k50hjtg2xemnjm8s7y8dws9xqa5y8w',
             ('LUNA', 'LunaX'): 'terra1qswfc7hmmsnwf7f2nyyx843sug60urnqgz75zu',
+            ('LUNA', 'cLUNA'): 'terra102t6psqa45ahfd7wjskk3gcnfev32wdngkcjzd',
+            ('PRISM', 'xPRISM'): 'terra1c868juk7lk9vuvetf0644qgxscsu4xwag6yaxs',
         },
         'TERRASWAP_PAIRS': {
             ('LUNA', 'bLUNA'): 'terra1jxazgm67et0ce260kvrpfv50acuushpjsz2y0p',
             ('LUNA', 'LunaX'): 'terra1zrzy688j8g6446jzd88vzjzqtywh6xavww92hy',
+            ('LUNA', 'cLUNA'): 'terra1ejyqwcemr5kda5pxwz27t2ja784j3d0nj0v6lh',
+            ('PRISM', 'xPRISM'): 'terra1urt608par6rkcancsjzm76472phptfwq397gpm',
         },
         'STADER_LIQUID_STAKING': 'terra1xacqx447msqp46qmv8k2sq6v5jh9fdj37az898',
     }

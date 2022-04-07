@@ -117,4 +117,4 @@ class Prism(Protocol):
         )
 
 
-prism = Prism()
+prism_app = Prism()

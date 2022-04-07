@@ -22,4 +22,4 @@ class Stader(Protocol):
         )
 
 
-stader = Stader()
+stader_app = Stader()

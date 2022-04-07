@@ -1,26 +1,12 @@
-from apps.prism import prism
-from strategies.base import Strategy, ArbitrageStrategy
+from apps.prism import prism_app
+from strategies.base import Strategy
 from utils.wallet import wallet
-
-
-class PrismcLunaStrategy(ArbitrageStrategy):
-
-    protocol = prism
-    from_token = 'LUNA'
-    to_token = 'cLUNA'
-
-
-class PrismReversecLunaStrategy(ArbitrageStrategy):
-
-    protocol = prism
-    from_token = 'cLUNA'
-    to_token = 'LUNA'
 
 
 class RefractLunaStrategy(Strategy):
     threshold = 1
 
-    protocol = prism
+    protocol = prism_app
     name = 'LUNA -> (pLUNA + yLUNA)'
     requires = ['LUNA']
 
@@ -30,8 +16,8 @@ class RefractLunaStrategy(Strategy):
         if not amount:
             return
 
-        luna_to_pluna = await prism.simulate_swap('LUNA', 'pLUNA')
-        luna_to_yluna = await prism.simulate_swap('LUNA', 'yLUNA')
+        luna_to_pluna = await prism_app.simulate_swap('LUNA', 'pLUNA')
+        luna_to_yluna = await prism_app.simulate_swap('LUNA', 'yLUNA')
 
         print('1 LUNA == %.2f pLUNA' % luna_to_pluna)
         print('1 LUNA == %.2f yLUNA' % luna_to_yluna)
@@ -41,8 +27,8 @@ class RefractLunaStrategy(Strategy):
         print('pLUNA ratio: %.2f%%' % (pluna_ratio * 100))
         print('yLUNA ratio: %.2f%%' % (yluna_ratio * 100))
 
-        pluna = await prism.simulate_swap('LUNA', 'pLUNA', amount * yluna_ratio)
-        yluna = await prism.simulate_swap('LUNA', 'yLUNA', amount * pluna_ratio)
+        pluna = await prism_app.simulate_swap('LUNA', 'pLUNA', amount * yluna_ratio)
+        yluna = await prism_app.simulate_swap('LUNA', 'yLUNA', amount * pluna_ratio)
         luna_to_refract = min(pluna, yluna)
 
         print('%.6f pLUNA -> %.6f LUNA' % (amount * yluna_ratio, pluna))
@@ -56,8 +42,8 @@ class RefractLunaStrategy(Strategy):
         if not amount:
             return
 
-        luna_to_pluna = await prism.simulate_swap('LUNA', 'pLUNA', amount)
-        luna_to_yluna = await prism.simulate_swap('LUNA', 'yLUNA', amount)
+        luna_to_pluna = await prism_app.simulate_swap('LUNA', 'pLUNA', amount)
+        luna_to_yluna = await prism_app.simulate_swap('LUNA', 'yLUNA', amount)
 
         # print('%d LUNA == %.2f pLUNA' % (amount, luna_to_pluna))
         # print('%d LUNA == %.2f yLUNA' % (amount, luna_to_yluna))
@@ -67,8 +53,8 @@ class RefractLunaStrategy(Strategy):
         # print('pLUNA ratio: %.2f%%' % (pluna_ratio * 100))
         # print('yLUNA ratio: %.2f%%' % (yluna_ratio * 100))
 
-        pluna = await prism.simulate_swap('LUNA', 'pLUNA', int(amount * yluna_ratio))
-        yluna = await prism.simulate_swap('LUNA', 'yLUNA', int(amount * pluna_ratio))
+        pluna = await prism_app.simulate_swap('LUNA', 'pLUNA', int(amount * yluna_ratio))
+        yluna = await prism_app.simulate_swap('LUNA', 'yLUNA', int(amount * pluna_ratio))
         luna_to_refract = min(pluna, yluna)
 
         # print('%.6f pLUNA -> %.6f LUNA' % (amount * yluna_ratio, pluna))
@@ -100,37 +86,17 @@ class RefractLunaStrategy(Strategy):
     #     return (luna_to_refract / amount - 1) * 100
 
 
-class xPrismStrategy(ArbitrageStrategy):
-    threshold = 4
-
-    protocol = prism
-    from_token = 'PRISM'
-    to_token = 'xPRISM'
-
-    async def get_exchange_rate(self):
-        return await prism.get_xprism_exchange_rate()
-
-
-class ReversexPrismStrategy(ArbitrageStrategy):
-    protocol = prism
-    from_token = 'xPRISM'
-    to_token = 'PRISM'
-
-    async def get_exchange_rate(self):
-        return 1 / await prism.get_xprism_exchange_rate()
-
-
 class PrismWithdrawLunaStrategy(Strategy):
-    protocol = prism
+    protocol = prism_app
     name = 'Withdraw Luna'
 
     threshold = 0
 
     async def get_score(self):
-        if await prism.withdrawable_luna():
+        if await prism_app.withdrawable_luna():
             return 0.0001
 
         return 0
 
     async def execute(self):
-        await prism.withdraw_luna()
+        await prism_app.withdraw_luna()

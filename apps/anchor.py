@@ -41,4 +41,4 @@ class Anchor(Protocol):
         return await wallet.call_contract(bluna_hub_contract, msg)
 
 
-anchor = Anchor()
+anchor_app = Anchor()

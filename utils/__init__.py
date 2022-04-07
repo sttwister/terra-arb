@@ -14,3 +14,9 @@ def make_coins(token, amount):
     return Coins([
         Coin(network.NATIVE_COINS[token], amount)
     ])
+
+
+def reverse_exchange_rate(get_exchange_rate):
+    async def _reverse_exchange_rate():
+        return 1 / await get_exchange_rate()
+    return _reverse_exchange_rate
