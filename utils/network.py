@@ -40,6 +40,11 @@ class Mainnet(TerraNetwork):
             ('LUNA', 'cLUNA'): 'terra1ejyqwcemr5kda5pxwz27t2ja784j3d0nj0v6lh',
             ('PRISM', 'xPRISM'): 'terra1urt608par6rkcancsjzm76472phptfwq397gpm',
         },
+        'LOOP_PAIRS': {
+            ('LUNA', 'bLUNA'): 'terra1v93ll6kqp33unukuwls3pslquehnazudu653au',
+            ('LUNA', 'LunaX'): 'terra1ga8dcmurj8a3hd4vvdtqykjq9etnw5sjglw4rg',
+            ('LUNA', 'cLUNA'): 'terra1ur6yyha884t5rhpf6was9xlr7xpcq40aw2r5jx',
+        },
         'STADER_LIQUID_STAKING': 'terra1xacqx447msqp46qmv8k2sq6v5jh9fdj37az898',
     }
     TOKENS = {
