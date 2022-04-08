@@ -18,5 +18,8 @@ def make_coins(token, amount):
 
 def reverse_exchange_rate(get_exchange_rate):
     async def _reverse_exchange_rate():
-        return 1 / await get_exchange_rate()
+        exchange_rate = await get_exchange_rate()
+        if not exchange_rate:
+            return
+        return 1 / exchange_rate
     return _reverse_exchange_rate
