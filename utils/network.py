@@ -75,6 +75,8 @@ class Testnet(TerraNetwork):
             ('LUNA', 'bLUNA'): 'terra13e4jmcjnwrauvl2fnjdwex0exuzd8zrh5xk29v',
             ('LUNA', 'LunaX'): '',
         },
+        'LOOP_PAIRS': {
+        }
         'STADER_LIQUID_STAKING': '',
     }
     TOKENS = {
