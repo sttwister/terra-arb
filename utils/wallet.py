@@ -104,6 +104,8 @@ class Wallet:
             CreateTxOptions(msgs=[execute_msg])
         )
 
+        plugin_manager.dispatch('before_broadcast_tx', tx)
+
         result = await network.lcd.tx.broadcast(tx)
 
         plugin_manager.dispatch('after_call_contract', contract, msg, coins, result)

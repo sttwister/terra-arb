@@ -120,5 +120,9 @@ class RichPlugin(Plugin):
         self.console.print('Msg:')
         self.console.print(msg)
         if coins:
-            self.console.print(f'Coins: {coins}')
+            self.console.print(f'Coins:\n  [green]{coins}')
+        self.console.print()
+
+    def before_broadcast_tx(self, tx):
+        self.console.print(f'Broadcasting tx: [bold magenta]{tx}[/]')
         self.console.print()

@@ -58,11 +58,9 @@ class ArbitrageStrategy(Strategy):
 
     async def execute(self):
         amount = await wallet.get(self.from_token)
-        print('EXECUTING SWAP %f %s -> %s' % (
-            amount / 10 ** 6,
-            self.from_token,
-            self.to_token,
-        ))
+
+        if not amount:
+            return
 
         await self.protocol.swap(self.from_token, self.to_token, amount)
 
