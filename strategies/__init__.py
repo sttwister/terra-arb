@@ -4,7 +4,7 @@ from strategies.anchor import AnchorWithdrawLunaStrategy, AnchorUnbondBLunaStrat
 from strategies.arbitrage import ArbitrageStrategy
 from strategies.base import StrategyGroup
 from strategies.prism import PrismWithdrawLunaStrategy, PrismUnbondCLunaStrategy, PrismUnstakeXPrismStrategy, \
-    RefractLunaStrategy
+    RefractLunaStrategy, PrismMergeLunaStrategy
 from utils import reverse_exchange_rate
 
 
@@ -54,6 +54,9 @@ STRATEGY_GROUPS = {
             # ArbitrageStrategy.create(
             #     astroport, 'LUNA', 'cLUNA',
             # ),
+
+            # Refract LUNA
+            RefractLunaStrategy(),
         ],
         name='LUNA arbitrage',
     ),
@@ -136,6 +139,7 @@ STRATEGY_GROUPS = {
         [
             AnchorUnbondBLunaStrategy(),
             AnchorWithdrawLunaStrategy(),
+            PrismMergeLunaStrategy(),
             PrismUnbondCLunaStrategy(),
             PrismWithdrawLunaStrategy(),
             PrismUnstakeXPrismStrategy(),

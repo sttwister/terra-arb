@@ -5,7 +5,7 @@ from terra_sdk.core import Coins
 from terra_sdk.core.wasm import MsgExecuteContract
 from terra_sdk.key.mnemonic import MnemonicKey
 
-from config import MNEMONIC
+import config
 from plugins import plugin_manager
 from utils import encode_msg, network
 
@@ -93,28 +93,6 @@ class Wallet:
 
         return response
 
-    async def call_contract(self, contract, msg, coins=Coins()):
-        plugin_manager.dispatch('before_call_contract', contract, msg, coins)
-
-        execute_msg = MsgExecuteContract(
-            sender=self.address,
-            contract=contract,
-            execute_msg=msg,
-            coins=coins,
-        )
-
-        tx = await self.wallet.create_and_sign_tx(
-            CreateTxOptions(msgs=[execute_msg])
-        )
-
-        plugin_manager.dispatch('before_broadcast_tx', tx)
-
-        result = await network.lcd.tx.broadcast(tx)
-
-        plugin_manager.dispatch('after_call_contract', contract, msg, coins, result)
-
-        return result
-
     async def call_contract_with_token(self, contract, msg, token, amount):
         token_contract = network.TOKENS[token]
         send_msg = {
@@ -127,5 +105,62 @@ class Wallet:
 
         return await self.call_contract(token_contract, send_msg)
 
+    async def call_contract(self, contract, msg, coins=Coins()):
+        plugin_manager.dispatch('before_call_contract', contract, msg, coins)
 
-wallet = Wallet(MNEMONIC)
+        execute_msg = MsgExecuteContract(
+            sender=self.address,
+            contract=contract,
+            execute_msg=msg,
+            coins=coins,
+        )
+
+        result = await self.broadcast_msgs([execute_msg])
+
+        return result
+
+    async def broadcast_msgs(self, msgs):
+        if not config.BROADCAST_TX:
+            return
+
+        tx = await self.wallet.create_and_sign_tx(
+            CreateTxOptions(msgs=msgs)
+        )
+
+        plugin_manager.dispatch('before_broadcast_tx', tx)
+
+        result = await network.lcd.tx.broadcast(tx)
+
+        return result
+
+    async def call_contracts_multiple(self, contract_calls):
+        """
+        Executes a list of multiple contract call msgs in a single transaction.
+
+        Each item in contract_calls must be a dict with the following structure:
+
+            {
+                'contract': <...>,
+                'msg': <...>,
+                'coins': <...>,
+            }
+        """
+        msgs = []
+        for call in contract_calls:
+            coins = call.get('coins', Coins())
+
+            plugin_manager.dispatch('before_call_contract', call['contract'], call['msg'], coins=coins)
+
+            msgs.append(
+                MsgExecuteContract(
+                    sender=self.address,
+                    contract=call['contract'],
+                    execute_msg=call['msg'],
+                    coins=coins,
+                )
+            )
+
+        return await self.broadcast_msgs(msgs)
+
+
+wallet = Wallet(config.MNEMONIC)

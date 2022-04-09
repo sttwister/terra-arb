@@ -115,6 +115,10 @@ class RichPlugin(Plugin):
         simulate_time = time.time() - self.start_time
         self.console.print('Simulation time: [bold yellow]{:.2f}s[/]'.format(simulate_time))
 
+    def before_strategy_execute(self, strategy, score):
+        self.console.print(f'Executing strategy [bold magenta]{strategy.get_name()}[/] with score [bold green]{score}[/]')
+        self.console.print()
+
     def before_call_contract(self, contract, msg, coins):
         self.console.print(f'Calling contract: [bold magenta]{contract}[/]')
         self.console.print('Msg:')
@@ -124,5 +128,5 @@ class RichPlugin(Plugin):
         self.console.print()
 
     def before_broadcast_tx(self, tx):
-        self.console.print(f'Broadcasting tx: [bold magenta]{tx}[/]')
+        self.console.print(f'Broadcasting tx...')
         self.console.print()

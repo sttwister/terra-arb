@@ -1,6 +1,8 @@
 import asyncio
 from math import inf
 
+from plugins import plugin_manager
+
 
 class StrategyGroup:
     """
@@ -65,6 +67,7 @@ class StrategyGroup:
         # Execute the best strategy that exceeds its threshold
         for strategy, score in scores.items():
             if score > strategy.threshold:
+                plugin_manager.dispatch('before_strategy_execute', strategy, score)
                 await strategy.execute()
                 return
 

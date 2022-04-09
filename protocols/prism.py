@@ -63,7 +63,8 @@ class Prism(DexProtocol):
 
         return float((await wallet.query_contract(network.CONTRACTS['PRISM_SWAP_ROUTER'], msg))['amount'])
 
-    async def swap_native_coin(self, from_token, to_token, amount, max_spread=0.005):
+    async def get_swap_native_coin_contract_call(self, from_token, to_token, amount, max_spread=0.005):
+        prism_swap_router_contract = network.CONTRACTS['PRISM_SWAP_ROUTER']
         expected = await self.simulate_swap(from_token, to_token, amount)
         minimum_receive = int(expected * (1 - max_spread))
 
@@ -79,7 +80,18 @@ class Prism(DexProtocol):
 
         coins = make_coins(from_token, amount)
 
-        return await wallet.call_contract(network.CONTRACTS['PRISM_SWAP_ROUTER'], msg, coins=coins)
+        return {
+            'contract': prism_swap_router_contract,
+            'msg': msg,
+            'coins': coins,
+        }
+
+    async def swap_native_coin(self, from_token, to_token, amount, max_spread=0.005):
+        contract_call = await self.get_swap_native_coin_contract_call(from_token, to_token, amount, max_spread)
+
+        return await wallet.call_contract(
+            contract_call['contract'], contract_call['msg'], contract_call['coins']
+        )
 
     #
     # Unbond & withdraw cLUNA

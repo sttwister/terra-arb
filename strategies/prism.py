@@ -1,5 +1,7 @@
+import config
 from protocols import protocol_manager
 from strategies.base import Strategy
+from utils import network
 from utils.wallet import wallet
 
 
@@ -7,43 +9,19 @@ prism = protocol_manager.get_protocol('prism')
 
 
 class RefractLunaStrategy(Strategy):
-    threshold = 1
-
     protocol = prism
     name = 'LUNA -> (pLUNA + yLUNA)'
     requires = ['LUNA']
 
     async def get_score(self):
-        amount = await wallet.get('LUNA')
+        if config.USE_WALLET_FOR_SIMULATE:
+            amount = await wallet.get('LUNA')
+        else:
+            amount = 10 ** 6
 
-        if not amount:
-            return
-
-        luna_to_pluna = await prism.simulate_swap('LUNA', 'pLUNA')
-        luna_to_yluna = await prism.simulate_swap('LUNA', 'yLUNA')
-
-        print('1 LUNA == %.2f pLUNA' % luna_to_pluna)
-        print('1 LUNA == %.2f yLUNA' % luna_to_yluna)
-
-        pluna_ratio = luna_to_pluna / (luna_to_pluna + luna_to_yluna)
-        yluna_ratio = luna_to_yluna / (luna_to_pluna + luna_to_yluna)
-        print('pLUNA ratio: %.2f%%' % (pluna_ratio * 100))
-        print('yLUNA ratio: %.2f%%' % (yluna_ratio * 100))
-
-        pluna = await prism.simulate_swap('LUNA', 'pLUNA', amount * yluna_ratio)
-        yluna = await prism.simulate_swap('LUNA', 'yLUNA', amount * pluna_ratio)
-        luna_to_refract = min(pluna, yluna)
-
-        print('%.6f pLUNA -> %.6f LUNA' % (amount * yluna_ratio, pluna))
-        print('%.6f yLUNA -> %.6f LUNA' % (amount * pluna_ratio, yluna))
-
-        return (luna_to_refract / amount - 1) * 100
-
-    async def simulate(self):
-        amount = await wallet.get('LUNA')
-
-        if not amount:
-            return
+        # At least 0.001 LUNA
+        if not amount or amount < 1000:
+            return 0
 
         luna_to_pluna = await prism.simulate_swap('LUNA', 'pLUNA', amount)
         luna_to_yluna = await prism.simulate_swap('LUNA', 'yLUNA', amount)
@@ -65,28 +43,25 @@ class RefractLunaStrategy(Strategy):
 
         return (luna_to_refract - amount) / amount * 100
 
-    # def simulate(self):
-    #     amount = wallet['LUNA']
-    #
-    #     luna_to_pluna = prism_swap.simulate_swap('LUNA', 'pLUNA')
-    #     luna_to_yluna = prism_swap.simulate_swap('LUNA', 'yLUNA')
-    #
-    #     print('1 LUNA == %.2f pLUNA' % luna_to_pluna)
-    #     print('1 LUNA == %.2f yLUNA' % luna_to_yluna)
-    #
-    #     pluna_ratio = luna_to_pluna / 2
-    #     yluna_ratio = luna_to_yluna / 2
-    #     print('pLUNA ratio: %.2f%%' % (pluna_ratio * 100))
-    #     print('yLUNA ratio: %.2f%%' % (yluna_ratio * 100))
-    #
-    #     pluna = prism_swap.simulate_swap('LUNA', 'pLUNA', amount * yluna_ratio)
-    #     yluna = prism_swap.simulate_swap('LUNA', 'yLUNA', amount * pluna_ratio)
-    #     luna_to_refract = min(pluna, yluna)
-    #
-    #     print('%.6f pLUNA -> %.6f LUNA' % (amount * yluna_ratio, pluna))
-    #     print('%.6f yLUNA -> %.6f LUNA' % (amount * pluna_ratio, yluna))
-    #
-    #     return (luna_to_refract / amount - 1) * 100
+    async def execute(self):
+        amount = await wallet.get('LUNA')
+
+        # At least 0.001 LUNA
+        if not amount or amount < 1000:
+            return 0
+
+        luna_to_pluna = await prism.simulate_swap('LUNA', 'pLUNA', amount)
+        luna_to_yluna = await prism.simulate_swap('LUNA', 'yLUNA', amount)
+
+        pluna_ratio = luna_to_pluna / (luna_to_pluna + luna_to_yluna)
+        yluna_ratio = luna_to_yluna / (luna_to_pluna + luna_to_yluna)
+
+        contract_calls = [
+            await prism.get_swap_native_coin_contract_call('LUNA', 'pLUNA', int(amount * yluna_ratio)),
+            await prism.get_swap_native_coin_contract_call('LUNA', 'yLUNA', int(amount * pluna_ratio)),
+        ]
+
+        return await wallet.call_contracts_multiple(contract_calls)
 
 
 class PrismWithdrawLunaStrategy(Strategy):
@@ -126,3 +101,58 @@ class PrismUnstakeXPrismStrategy(Strategy):
 
     async def execute(self):
         await prism.unstake_xprism()
+
+
+class PrismMergeLunaStrategy(Strategy):
+    protocol = prism
+    name = 'Merge pLUNA + yLUNA'
+
+    threshold = 0
+
+    async def get_score(self):
+        yluna = await wallet.get('yLUNA') or 0
+        pluna = await wallet.get('pLUNA') or 0
+
+        return min(yluna, pluna) / 10 ** 6
+
+    async def execute(self):
+        yluna = await wallet.get('yLUNA') or 0
+        pluna = await wallet.get('pLUNA') or 0
+
+        to_merge = min(yluna, pluna)
+
+        if to_merge < 1000:
+            return
+
+        prism_luna_vault_contract = network.CONTRACTS['PRISM_LUNA_VAULT']
+
+        msgs = [
+            {
+                'contract': network.TOKENS['pLUNA'],
+                'msg': {
+                    'increase_allowance': {
+                        'amount': str(to_merge),
+                        'spender': prism_luna_vault_contract,
+                    }
+                },
+            },
+            {
+                'contract': network.TOKENS['yLUNA'],
+                'msg': {
+                    'increase_allowance': {
+                        'amount': str(to_merge),
+                        'spender': prism_luna_vault_contract,
+                    }
+                },
+            },
+            {
+                'contract': prism_luna_vault_contract,
+                'msg': {
+                    'merge': {
+                        'amount': str(to_merge),
+                    }
+                },
+            },
+        ]
+
+        return await wallet.call_contracts_multiple(msgs)
