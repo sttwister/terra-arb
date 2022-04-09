@@ -11,7 +11,7 @@ class ArbitrageStrategy(Strategy):
 
     The score is equal to the profit of the swap.
     """
-    threshold = 5
+    threshold = 3
 
     protocol = None
     from_token = None

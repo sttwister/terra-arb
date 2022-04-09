@@ -13,6 +13,8 @@ class RefractLunaStrategy(Strategy):
     name = 'LUNA -> (pLUNA + yLUNA)'
     requires = ['LUNA']
 
+    threshold = 4
+
     async def get_score(self):
         if config.USE_WALLET_FOR_SIMULATE:
             amount = await wallet.get('LUNA')
