@@ -51,7 +51,8 @@ class StrategyGroup:
         """
         return [
             {
-                'protocol': strategy.protocol.get_name() if hasattr(strategy, 'protocol') else '',
+                'strategy': strategy,
+                'protocol_name': strategy.protocol.get_name() if hasattr(strategy, 'protocol') else '',
                 'name': strategy.get_name(),
                 'score': score,
                 'min': self.history[strategy]['min'],

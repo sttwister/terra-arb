@@ -19,12 +19,12 @@ async def run_loop():
     from strategies import STRATEGY_GROUPS
     from utils.wallet import wallet
 
-    while True:
-        groups = [
-            STRATEGY_GROUPS.get(strategy_group)
-            for strategy_group in config.ENABLED_STRATEGY_GROUPS
-        ]
+    groups = [
+        STRATEGY_GROUPS.get(strategy_group)
+        for strategy_group in config.ENABLED_STRATEGY_GROUPS
+    ]
 
+    while True:
         populate_wallet_cache = wallet.populate_cache()
         run_strategies = asyncio.gather(*(
             group.run() for group in groups
