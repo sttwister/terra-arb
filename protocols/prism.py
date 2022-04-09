@@ -2,12 +2,13 @@ from terra_sdk.exceptions import LCDResponseError
 
 from protocols import protocol_manager
 from protocols.base import Protocol
+from protocols.dex import DexProtocol
 from utils import make_coins, network
 from utils.wallet import wallet
 
 
 @protocol_manager.register
-class Prism(Protocol):
+class Prism(DexProtocol):
     id = 'prism'
     name = 'Prism'
 
@@ -34,7 +35,7 @@ class Prism(Protocol):
             }
         }
 
-    async def simulate_swap(self, from_token, to_token, amount=1000000):
+    def get_swap_operations(self, from_token, to_token):
         operations = []
         if from_token != 'PRISM':
             operations.append(
@@ -46,6 +47,11 @@ class Prism(Protocol):
                 self.get_prism_swap('PRISM', to_token)
             )
 
+        return operations
+
+    async def simulate_swap(self, from_token, to_token, amount=1000000):
+        operations = self.get_swap_operations(from_token, to_token)
+
         msg = {
             'simulate_swap_operations': {
                 'offer_amount': str(amount),
@@ -54,6 +60,24 @@ class Prism(Protocol):
         }
 
         return float((await wallet.query_contract(network.CONTRACTS['PRISM_SWAP_ROUTER'], msg))['amount'])
+
+    async def swap_native_coin(self, from_token, to_token, amount=1000000, max_spread=0.005):
+        expected = await self.simulate_swap(from_token, to_token)
+        minimum_receive = int(expected * (1 - max_spread))
+
+        operations = self.get_swap_operations(from_token, to_token)
+
+        msg = {
+            'execute_swap_operations': {
+                'minimum_received': str(minimum_receive),
+                'offer_amount': str(amount),
+                'operations': operations
+            }
+        }
+
+        coins = make_coins(from_token, amount)
+
+        return await wallet.call_contract(network.CONTRACTS['PRISM_SWAP_ROUTER'], msg, coins=coins)
 
     #
     # Unbond & withdraw cLUNA
