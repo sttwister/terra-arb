@@ -5,13 +5,14 @@ import click as click
 from rich.traceback import install
 
 import config
+from plugins import plugin_manager
 
 
-# Nice prety colored tracebacks
+# Nice pretty colored tracebacks
 install(show_locals=True)
 
 
-async def run_loop(summary_callback=None):
+async def run_loop():
     """
     Main entry point for the bot.
     """
@@ -31,8 +32,7 @@ async def run_loop(summary_callback=None):
 
         await asyncio.gather(populate_wallet_cache, run_strategies)
 
-        if summary_callback:
-            summary_callback(groups)
+        plugin_manager.after_simulate(groups)
 
         if config.EXECUTE:
             for group in groups:
@@ -41,86 +41,13 @@ async def run_loop(summary_callback=None):
         await asyncio.sleep(config.SLEEP_INTERVAL)
 
 
-def tabulate_summary(groups):
-    """
-    Prints a summary of the current state of the bot using tabulate.
-    """
-    from tabulate import tabulate
-
-    headers = ['Protocol', 'Strategy', 'Score', 'Min', 'Max']
-    for group in groups:
-        table = []
-        summary = group.get_summary()
-        for strategy_summary in summary:
-            table.append([
-                strategy_summary['protocol'],
-                strategy_summary['name'],
-                strategy_summary['score'],
-                strategy_summary['min'],
-                strategy_summary['max'],
-            ])
-        print(tabulate(table, headers=headers, floatfmt='.2f'))
-        print()
-
-
-def rich_summary(groups):
-    """
-    Prints a rich summary of the current state of the bot using rich.
-    """
-    from rich.columns import Columns
-    from rich.console import Console
-    from rich.table import Table
-
-    from utils.wallet import wallet
-
-    console = Console()
-    console.clear()
-
-    tables = []
-    for group in groups:
-        table = Table(title=group.name)
-
-        table.add_column('Protocol', justify='left')
-        table.add_column('Strategy', justify='left')
-        table.add_column('Score', justify='right')
-        table.add_column('Min', justify='right')
-        table.add_column('Max', justify='right')
-
-        summary = group.get_summary()
-        for strategy_summary in summary:
-            row = (
-                strategy_summary['protocol'],
-                strategy_summary['name'],
-                '%.2f%%' % strategy_summary['score'],
-                '%.2f%%' % strategy_summary['min'],
-                '%.2f%%' % strategy_summary['max'],
-            )
-            table.add_row(*row)
-
-        tables.append(table)
-
-    wallet_table = Table(title='Wallet')
-    wallet_table.add_column('Token', justify='left')
-    wallet_table.add_column('Balance', justify='right')
-
-    for token, balance in wallet.get_summary():
-        wallet_table.add_row(token, balance)
-
-    tables.append(wallet_table)
-
-    console.print(Columns(tables))
-
-
 @click.command()
-@click.option('--summary', type=click.Choice(['tabulate', 'rich']), default='rich')
-def main(summary):
-    summary_callback = {
-        'tabulate': tabulate_summary,
-        'rich': rich_summary,
-    }.get(summary)
+def main():
+    for plugin in config.ACTIVE_PLUGINS:
+        plugin_manager.activate(plugin)
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(run_loop(summary_callback=summary_callback))
+    loop.run_until_complete(run_loop())
 
 
 if __name__ == '__main__':

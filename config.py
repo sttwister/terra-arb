@@ -18,6 +18,9 @@ ENABLED_STRATEGY_GROUPS = [
     'prism_arb',
     'luna_withdraw',
 ]
+ACTIVE_PLUGINS = [
+    'rich',
+]
 
 MNEMONIC = env('MNEMONIC')
 NETWORK = env('NETWORK', 'testnet')
