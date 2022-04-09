@@ -21,9 +21,11 @@ async def run_loop():
 
     plugin_manager.dispatch('init')
 
-    groups = strategy_manager.strategy_groups
+    groups = strategy_manager.get_strategy_groups()
 
     while True:
+        plugin_manager.dispatch('loop_start')
+
         populate_wallet_cache = wallet.populate_cache()
         run_strategies = asyncio.gather(*(
             group.run() for group in groups

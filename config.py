@@ -10,9 +10,9 @@ def env(name, default=None):
     return os.environ.get(name, default)
 
 
-EXECUTE = False
-USE_WALLET_FOR_SIMULATE = False
-SLEEP_INTERVAL = 3
+MNEMONIC = env('MNEMONIC')
+NETWORK = env('NETWORK', 'testnet')
+
 ENABLED_STRATEGY_GROUPS = [
     'luna_arb',
     'prism_arb',
@@ -22,5 +22,6 @@ ACTIVE_PLUGINS = [
     'rich',
 ]
 
-MNEMONIC = env('MNEMONIC')
-NETWORK = env('NETWORK', 'testnet')
+EXECUTE = False
+USE_WALLET_FOR_SIMULATE = False
+SLEEP_INTERVAL = 3

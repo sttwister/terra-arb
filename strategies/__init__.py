@@ -143,10 +143,13 @@ STRATEGY_GROUPS = {
 
 class StrategyManager:
     def __init__(self):
-        self.strategy_groups = [
-            STRATEGY_GROUPS.get(strategy_group)
+        self.strategy_groups = {
+            strategy_group: STRATEGY_GROUPS.get(strategy_group)
             for strategy_group in config.ENABLED_STRATEGY_GROUPS
-        ]
+        }
+
+    def get_strategy_groups(self):
+        return self.strategy_groups.values()
 
 
 strategy_manager = StrategyManager()
