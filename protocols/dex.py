@@ -1,12 +1,7 @@
+from protocols import protocol_manager
+from protocols.base import Protocol
 from utils import make_coins, network
 from utils.wallet import wallet
-
-
-class Protocol:
-    name = None
-
-    def get_name(self):
-        return self.name
 
 
 class DexProtocol(Protocol):
@@ -94,13 +89,20 @@ class DexProtocol(Protocol):
         return await wallet.call_contract_with_token(pair_contract, msg, from_token, amount)
 
     @classmethod
-    def create(cls, protocol_name, pairs_identifier):
+    def create(cls, protocol_id, protocol_name, protocol_pairs_identifier):
         class CustomDexProtocol(cls):
+            id = protocol_id
             name = protocol_name
-            PAIRS_IDENTIFIER = pairs_identifier
+            PAIRS_IDENTIFIER = protocol_pairs_identifier
 
             def __repr__(self):
                 return "CustomDexProtocol(%s)" % self.name
 
-        return CustomDexProtocol()
+
+        protocol_manager.register(CustomDexProtocol)
+
+
+DexProtocol.create('astroport', 'Astroport', 'ASTROPORT_PAIRS')
+DexProtocol.create('terraswap', 'Terraswap', 'TERRASWAP_PAIRS')
+DexProtocol.create('loop', 'Loop', 'LOOP_PAIRS')
 

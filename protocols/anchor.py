@@ -1,11 +1,14 @@
 from terra_sdk.exceptions import LCDResponseError
 
-from apps.base import Protocol
+from protocols import protocol_manager
+from protocols.base import Protocol
 from utils import network
 from utils.wallet import wallet
 
 
+@protocol_manager.register
 class Anchor(Protocol):
+    id = 'anchor'
     name = 'Anchor'
 
     async def unbond_bluna(self, amount):
@@ -39,6 +42,3 @@ class Anchor(Protocol):
         }
 
         return await wallet.call_contract(bluna_hub_contract, msg)
-
-
-anchor_app = Anchor()

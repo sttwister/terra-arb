@@ -4,6 +4,7 @@ from rich.table import Table
 
 from plugins import plugin_manager
 from plugins.base import Plugin
+from strategies import strategy_manager
 from utils.wallet import wallet
 
 
@@ -16,12 +17,12 @@ class RichPlugin(Plugin):
 
     header_style = 'bold magenta'
 
-    def after_simulate(self, groups):
+    def after_simulate(self):
         console = Console()
         console.clear()
 
         tables = []
-        for group in groups:
+        for group in strategy_manager.strategy_groups:
             table = Table(title=group.name, header_style=self.header_style)
 
             table.add_column('Protocol', justify='left')

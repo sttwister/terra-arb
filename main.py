@@ -16,13 +16,12 @@ async def run_loop():
     """
     Main entry point for the bot.
     """
-    from strategies import STRATEGY_GROUPS
+    from strategies import strategy_manager
     from utils.wallet import wallet
 
-    groups = [
-        STRATEGY_GROUPS.get(strategy_group)
-        for strategy_group in config.ENABLED_STRATEGY_GROUPS
-    ]
+    plugin_manager.dispatch('init')
+
+    groups = strategy_manager.strategy_groups
 
     while True:
         populate_wallet_cache = wallet.populate_cache()
@@ -32,7 +31,7 @@ async def run_loop():
 
         await asyncio.gather(populate_wallet_cache, run_strategies)
 
-        plugin_manager.after_simulate(groups)
+        plugin_manager.dispatch('after_simulate')
 
         if config.EXECUTE:
             for group in groups:

@@ -1,18 +1,21 @@
-from apps.anchor import anchor_app
+from protocols import protocol_manager
 from strategies.base import Strategy
 
 
+anchor = protocol_manager.get_protocol('anchor')
+
+
 class AnchorWithdrawLunaStrategy(Strategy):
-    protocol = anchor_app
+    protocol = anchor
     name = 'Withdraw Luna'
 
     threshold = 0
 
     async def get_score(self):
-        if await anchor_app.withdrawable_luna():
+        if await anchor.withdrawable_luna():
             return 0.0001
 
         return 0
 
     async def execute(self):
-        await anchor_app.withdraw_luna()
+        await anchor.withdraw_luna()

@@ -1,11 +1,14 @@
 from terra_sdk.exceptions import LCDResponseError
 
-from apps.base import Protocol
+from protocols import protocol_manager
+from protocols.base import Protocol
 from utils import make_coins, network
 from utils.wallet import wallet
 
 
+@protocol_manager.register
 class Prism(Protocol):
+    id = 'prism'
     name = 'Prism'
 
     #
@@ -115,6 +118,3 @@ class Prism(Protocol):
                 )
             )['exchange_rate']
         )
-
-
-prism_app = Prism()
