@@ -6,6 +6,7 @@ from terra_sdk.core.wasm import MsgExecuteContract
 from terra_sdk.key.mnemonic import MnemonicKey
 
 from config import MNEMONIC
+from plugins import plugin_manager
 from utils import encode_msg, network
 
 
@@ -28,6 +29,7 @@ class Wallet:
         self.cached = {}
 
     async def populate_cache(self):
+        self.reset_cache()
         for coin in network.NATIVE_COINS.keys():
             await self.get(coin)
 
@@ -80,16 +82,17 @@ class Wallet:
     #
 
     async def query_contract(self, contract, msg):
-        return await network.lcd.wasm.contract_query(contract, msg)
+        plugin_manager.dispatch('before_query_contract', contract, msg)
+
+        response = await network.lcd.wasm.contract_query(contract, msg)
+
+        plugin_manager.dispatch('after_query_contract', contract, msg, response)
+
+        return response
 
     async def call_contract(self, contract, msg, coins=Coins()):
-        print(f'Calling contract:')
-        print(f'Contract: {contract}')
-        print(f'Msg: {json.dumps(msg, indent=2)}')
-        if coins:
-            print(f'Coins: {coins}')
+        plugin_manager.dispatch('before_call_contract', contract, msg, coins)
 
-        print('Creating transaction and estimating fee... ', end='', flush=True)
         execute_msg = MsgExecuteContract(
             sender=self.address,
             contract=contract,
@@ -101,13 +104,9 @@ class Wallet:
             CreateTxOptions(msgs=[execute_msg])
         )
 
-        print('Done!')
-
-        print('Broadcasting transaction... ', end='', flush=True)
-
         result = await network.lcd.tx.broadcast(tx)
 
-        print('Done!')
+        plugin_manager.dispatch('after_call_contract', contract, msg, coins, result)
 
         return result
 

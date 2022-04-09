@@ -20,11 +20,11 @@ class PluginManager:
     def activate(self, plugin_id):
         self.enabled_plugins.append(self.registry[plugin_id]())
 
-    def dispatch(self, event):
+    def dispatch(self, event, *args, **kwargs):
         for plugin in self.enabled_plugins:
             method = getattr(plugin, event, None)
             if method:
-                method()
+                method(*args, **kwargs)
 
 
 plugin_manager = PluginManager()

@@ -37,7 +37,7 @@ async def run_loop():
 
         if config.EXECUTE:
             for group in groups:
-                group.execute()
+                await group.execute()
 
         await asyncio.sleep(config.SLEEP_INTERVAL)
 

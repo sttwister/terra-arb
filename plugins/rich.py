@@ -114,3 +114,11 @@ class RichPlugin(Plugin):
 
         simulate_time = time.time() - self.start_time
         self.console.print('Simulation time: [bold yellow]{:.2f}s[/]'.format(simulate_time))
+
+    def before_call_contract(self, contract, msg, coins):
+        self.console.print(f'Calling contract: [bold magenta]{contract}[/]')
+        self.console.print('Msg:')
+        self.console.print(msg)
+        if coins:
+            self.console.print(f'Coins: {coins}')
+        self.console.print()
