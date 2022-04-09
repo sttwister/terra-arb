@@ -1,9 +1,10 @@
 import config
 from protocols import protocol_manager
-from strategies.anchor import AnchorWithdrawLunaStrategy
+from strategies.anchor import AnchorWithdrawLunaStrategy, AnchorUnbondBLunaStrategy
 from strategies.arbitrage import ArbitrageStrategy
 from strategies.base import StrategyGroup
-from strategies.prism import PrismWithdrawLunaStrategy
+from strategies.prism import PrismWithdrawLunaStrategy, PrismUnbondCLunaStrategy, PrismUnstakeXPrismStrategy, \
+    RefractLunaStrategy
 from utils import reverse_exchange_rate
 
 
@@ -133,10 +134,13 @@ STRATEGY_GROUPS = {
     ),
     'luna_withdraw': StrategyGroup(
         [
+            AnchorUnbondBLunaStrategy(),
             AnchorWithdrawLunaStrategy(),
+            PrismUnbondCLunaStrategy(),
             PrismWithdrawLunaStrategy(),
+            PrismUnstakeXPrismStrategy(),
         ],
-        name='Withdraw LUNA',
+        name='Recycle tokens',
     )
 }
 

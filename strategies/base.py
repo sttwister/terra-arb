@@ -25,15 +25,13 @@ class StrategyGroup:
         """
         Returns a dict mapping strategy names to their scores.
         """
-        return dict(
-            sorted(
-                zip(
-                    self.strategies,
-                    await asyncio.gather(*[strategy.get_score() for strategy in self.strategies]),
-                ),
-                key=lambda x: -x[1]
-            )
-        )
+        scores = await asyncio.gather(*[strategy.get_score() for strategy in self.strategies])
+
+        # Return a dict mapping strategy names to their scores, sorted desc by score
+        return {
+            strategy: score
+            for strategy, score in sorted(zip(self.strategies, scores), key=lambda x: x[1], reverse=True)
+        }
 
     async def run(self):
         scores = await self.get_scores()

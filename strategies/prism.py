@@ -91,15 +91,38 @@ class RefractLunaStrategy(Strategy):
 
 class PrismWithdrawLunaStrategy(Strategy):
     protocol = prism
-    name = 'Withdraw Luna'
+    name = 'Withdraw LUNA'
 
     threshold = 0
 
     async def get_score(self):
-        if await prism.withdrawable_luna():
-            return 0.0001
-
-        return 0
+        return await prism.withdrawable_luna() / 10 ** 6
 
     async def execute(self):
         await prism.withdraw_luna()
+
+
+class PrismUnbondCLunaStrategy(Strategy):
+    protocol = prism
+    name = 'Unbond cLUNA'
+
+    threshold = 0
+
+    async def get_score(self):
+        return await wallet.get('cLUNA') / 10 ** 6
+
+    async def execute(self):
+        await prism.unbond_cluna()
+
+
+class PrismUnstakeXPrismStrategy(Strategy):
+    protocol = prism
+    name = 'Unstake xPRISM'
+
+    threshold = 0
+
+    async def get_score(self):
+        return await wallet.get('xPRISM') / 10 ** 6
+
+    async def execute(self):
+        await prism.unstake_xprism()

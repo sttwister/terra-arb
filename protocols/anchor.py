@@ -11,8 +11,9 @@ class Anchor(Protocol):
     id = 'anchor'
     name = 'Anchor'
 
-    async def unbond_bluna(self, amount):
+    async def unbond_bluna(self):
         bluna_hub_contract = network.CONTRACTS['ANCHOR_BLUNA_HUB']
+        amount = await wallet.get('bLUNA')
 
         msg = {
             'unbond': {}
@@ -32,7 +33,7 @@ class Anchor(Protocol):
         try:
             return int((await wallet.query_contract(bluna_hub_contract, msg))['withdrawable'])
         except LCDResponseError:
-            pass
+            return 0
 
     async def withdraw_luna(self):
         bluna_hub_contract = network.CONTRACTS['ANCHOR_BLUNA_HUB']

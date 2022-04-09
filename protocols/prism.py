@@ -12,6 +12,8 @@ class Prism(DexProtocol):
     id = 'prism'
     name = 'Prism'
 
+    PAIRS_IDENTIFIER = 'PRISM_PAIRS'
+
     #
     # Swap
     #
@@ -61,8 +63,8 @@ class Prism(DexProtocol):
 
         return float((await wallet.query_contract(network.CONTRACTS['PRISM_SWAP_ROUTER'], msg))['amount'])
 
-    async def swap_native_coin(self, from_token, to_token, amount=1000000, max_spread=0.005):
-        expected = await self.simulate_swap(from_token, to_token)
+    async def swap_native_coin(self, from_token, to_token, amount, max_spread=0.005):
+        expected = await self.simulate_swap(from_token, to_token, amount)
         minimum_receive = int(expected * (1 - max_spread))
 
         operations = self.get_swap_operations(from_token, to_token)
@@ -83,8 +85,9 @@ class Prism(DexProtocol):
     # Unbond & withdraw cLUNA
     #
 
-    async def unbond_cluna(self, amount):
+    async def unbond_cluna(self):
         prism_luna_vault_contract = network.CONTRACTS['PRISM_LUNA_VAULT']
+        amount = await wallet.get('cLUNA')
 
         msg = {
             'unbond': {}
@@ -104,7 +107,7 @@ class Prism(DexProtocol):
         try:
             return int((await wallet.query_contract(luna_vault_contract, msg))['withdrawable'])
         except LCDResponseError:
-            pass
+            return 0
 
     async def withdraw_luna(self):
         luna_vault_contract = network.CONTRACTS['PRISM_LUNA_VAULT']
@@ -142,3 +145,13 @@ class Prism(DexProtocol):
                 )
             )['exchange_rate']
         )
+
+    async def unstake_xprism(self):
+        prism_governance_contract = network.CONTRACTS['PRISM_GOVERNANCE']
+        amount = await wallet.get('xPRISM')
+
+        msg = {
+            'redeem_xprism': {}
+        }
+
+        return await wallet.call_contract_with_token(prism_governance_contract, msg, 'xPRISM', amount)

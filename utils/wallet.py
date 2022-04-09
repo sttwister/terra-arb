@@ -42,7 +42,10 @@ class Wallet:
         """
         return [
             (token, '%.2f' % (amount / 1000000))
-            for token, amount in self.cached.items()
+            for token, amount in sorted(
+                self.cached.items(),
+                key=lambda x: (-x[1], x[0])  # Sort by amount desc, name asc
+            )
         ]
 
     async def get_native_coins_amounts(self):
