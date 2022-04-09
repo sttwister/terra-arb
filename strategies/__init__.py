@@ -65,37 +65,46 @@ STRATEGY_GROUPS = {
             # bLuna
             ArbitrageStrategy.create(
                 astroport, 'bLUNA', 'LUNA',
+                strategy_threshold=-0.5,
             ),
             ArbitrageStrategy.create(
                 terraswap, 'bLUNA', 'LUNA',
+                strategy_threshold=-0.5,
             ),
             ArbitrageStrategy.create(
                 loop, 'bLUNA', 'LUNA',
+                strategy_threshold=-0.5,
             ),
 
             # LunaX
             ArbitrageStrategy.create(
                 astroport, 'LunaX', 'LUNA',
                 strategy_get_exchange_rate=reverse_exchange_rate(stader.get_lunax_exchange_rate),
+                strategy_threshold=-0.5,
             ),
             ArbitrageStrategy.create(
                 terraswap, 'LunaX', 'LUNA',
                 strategy_get_exchange_rate=reverse_exchange_rate(stader.get_lunax_exchange_rate),
+                strategy_threshold=-0.5,
             ),
             ArbitrageStrategy.create(
                 loop, 'LunaX', 'LUNA',
                 strategy_get_exchange_rate=reverse_exchange_rate(stader.get_lunax_exchange_rate),
+                strategy_threshold=-0.5,
             ),
 
             # cLUNA
             ArbitrageStrategy.create(
                 terraswap, 'cLUNA', 'LUNA',
+                strategy_threshold=-0.5,
             ),
             ArbitrageStrategy.create(
                 loop, 'cLUNA', 'LUNA',
+                strategy_threshold=-0.5,
             ),
             ArbitrageStrategy.create(
                 prism, 'cLUNA', 'LUNA',
+                strategy_threshold=-0.5,
             ),
             # While this pair does exist on Astroport, it is very illiquid and not worth arbitrage
             # ArbitrageStrategy.create(
@@ -108,12 +117,15 @@ STRATEGY_GROUPS = {
         [
             ArbitrageStrategy.create(
                 astroport, 'PRISM', 'xPRISM', strategy_get_exchange_rate=prism.get_xprism_exchange_rate,
+                strategy_threshold=5,
             ),
             ArbitrageStrategy.create(
                 terraswap, 'PRISM', 'xPRISM', strategy_get_exchange_rate=prism.get_xprism_exchange_rate,
+                strategy_threshold=5,
             ),
             ArbitrageStrategy.create(
                 prism, 'PRISM', 'xPRISM', strategy_get_exchange_rate=prism.get_xprism_exchange_rate,
+                strategy_threshold=5,
             ),
         ],
         name='xPRISM arbitrage',
@@ -123,14 +135,17 @@ STRATEGY_GROUPS = {
             ArbitrageStrategy.create(
                 astroport, 'xPRISM', 'PRISM',
                 strategy_get_exchange_rate=reverse_exchange_rate(prism.get_xprism_exchange_rate),
+                strategy_threshold=-1,
             ),
             ArbitrageStrategy.create(
                 terraswap, 'xPRISM', 'PRISM',
                 strategy_get_exchange_rate=reverse_exchange_rate(prism.get_xprism_exchange_rate),
+                strategy_threshold=-1,
             ),
             ArbitrageStrategy.create(
                 prism, 'xPRISM', 'PRISM',
                 strategy_get_exchange_rate=reverse_exchange_rate(prism.get_xprism_exchange_rate),
+                strategy_threshold=-1,
             ),
         ],
         name='Reverse xPRISM arbitrage',

@@ -66,7 +66,7 @@ class ArbitrageStrategy(Strategy):
 
     @classmethod
     def create(cls, strategy_protocol, strategy_from_token, strategy_to_token,
-               strategy_get_exchange_rate=None):
+               strategy_get_exchange_rate=None, strategy_threshold=threshold):
         """
         A factory for arbitrage strategies.
 
@@ -76,6 +76,8 @@ class ArbitrageStrategy(Strategy):
             protocol = strategy_protocol
             from_token = strategy_from_token
             to_token = strategy_to_token
+
+            threshold = strategy_threshold
 
             def __repr__(self):
                 return "CustomArbitrageStrategy(%s: %s -> %s)" % (self.protocol.get_name(), self.from_token, self.to_token)
