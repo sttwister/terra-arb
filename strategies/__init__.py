@@ -14,8 +14,8 @@ terraswap = DexProtocol.create('Terraswap', 'TERRASWAP_PAIRS')
 loop = DexProtocol.create('Loop', 'LOOP_PAIRS')
 
 
-STRATEGY_GROUPS = [
-    StrategyGroup(
+STRATEGY_GROUPS = {
+    'luna_arb': StrategyGroup(
         [
             # bLuna
             ArbitrageStrategy.create(
@@ -41,9 +41,6 @@ STRATEGY_GROUPS = [
 
             # cLUNA
             ArbitrageStrategy.create(
-                astroport, 'LUNA', 'cLUNA',
-            ),
-            ArbitrageStrategy.create(
                 terraswap, 'LUNA', 'cLUNA',
             ),
             ArbitrageStrategy.create(
@@ -52,20 +49,24 @@ STRATEGY_GROUPS = [
             ArbitrageStrategy.create(
                 prism_app, 'LUNA', 'cLUNA',
             ),
+            # While this pair does exist on Astroport, it is very illiquid and not worth arbitrage
+            # ArbitrageStrategy.create(
+            #     astroport, 'LUNA', 'cLUNA',
+            # ),
         ],
         name='LUNA arbitrage',
     ),
-    StrategyGroup(
+    'reverse_luna_arb': StrategyGroup(
         [
             # bLuna
             ArbitrageStrategy.create(
                 astroport, 'bLUNA', 'LUNA',
             ),
             ArbitrageStrategy.create(
-                terraswap, 'LUNA', 'bLUNA',
+                terraswap, 'bLUNA', 'LUNA',
             ),
             ArbitrageStrategy.create(
-                loop, 'LUNA', 'bLUNA',
+                loop, 'bLUNA', 'LUNA',
             ),
 
             # LunaX
@@ -84,9 +85,6 @@ STRATEGY_GROUPS = [
 
             # cLUNA
             ArbitrageStrategy.create(
-                astroport, 'cLUNA', 'LUNA',
-            ),
-            ArbitrageStrategy.create(
                 terraswap, 'cLUNA', 'LUNA',
             ),
             ArbitrageStrategy.create(
@@ -95,10 +93,14 @@ STRATEGY_GROUPS = [
             ArbitrageStrategy.create(
                 prism_app, 'cLUNA', 'LUNA',
             ),
+            # While this pair does exist on Astroport, it is very illiquid and not worth arbitrage
+            # ArbitrageStrategy.create(
+            #     astroport, 'cLUNA', 'LUNA',
+            # ),
         ],
         name='Reverse LUNA arbitrage',
     ),
-    StrategyGroup(
+    'prism_arb': StrategyGroup(
         [
             ArbitrageStrategy.create(
                 astroport, 'PRISM', 'xPRISM', strategy_get_exchange_rate=prism_app.get_xprism_exchange_rate,
@@ -112,7 +114,7 @@ STRATEGY_GROUPS = [
         ],
         name='xPRISM arbitrage',
     ),
-    StrategyGroup(
+    'reverse_prism_arb': StrategyGroup(
         [
             ArbitrageStrategy.create(
                 astroport, 'xPRISM', 'PRISM',
@@ -129,11 +131,11 @@ STRATEGY_GROUPS = [
         ],
         name='Reverse xPRISM arbitrage',
     ),
-    StrategyGroup(
+    'luna_withdraw': StrategyGroup(
         [
             AnchorWithdrawLunaStrategy(),
             PrismWithdrawLunaStrategy(),
         ],
         name='Withdraw LUNA',
     )
-]
+}
