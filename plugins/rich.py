@@ -24,15 +24,18 @@ class RichPlugin(Plugin):
     config_keys = [
         'EXECUTE',
         'USE_WALLET_FOR_SIMULATE',
-        'SLEEP_INTERVAL'
     ]
 
     def __init__(self):
-        self.console = Console()
+        from rich.traceback import install
 
+        # Nice pretty colored tracebacks
+        install(show_locals=True)
+
+        self.console = Console()
         self.start_time = None
 
-    def init(self):
+    def init(self, **kwargs):
         self.console.print('Starting [bold magenta]terra-arb[/bold magenta]!')
         self.console.print()
 
@@ -59,10 +62,10 @@ class RichPlugin(Plugin):
             self.console.print(f'  [bold magenta]{key}[/] = [bold green]{getattr(config, key)}[/]')
         self.console.print()
 
-    def loop_start(self):
+    def loop_start(self, **kwargs):
         self.start_time = time.time()
 
-    def after_simulate(self):
+    def after_scoring(self, **kwargs):
         self.console.clear()
 
         tables = []
@@ -112,14 +115,14 @@ class RichPlugin(Plugin):
         self.console.print(Columns(tables))
         self.console.print()
 
-        simulate_time = time.time() - self.start_time
-        self.console.print('Simulation time: [bold yellow]{:.2f}s[/]'.format(simulate_time))
+        scoring_time = time.time() - self.start_time
+        self.console.print('Strategy scoring time: [bold yellow]{:.2f}s[/]'.format(scoring_time))
 
-    def before_strategy_execute(self, strategy, score):
+    def before_strategy_execute(self, strategy=None, score=None, **kwargs):
         self.console.print(f'Executing strategy [bold magenta]{strategy.get_name()}[/] with score [bold green]{score}[/]')
         self.console.print()
 
-    def before_call_contract(self, contract, msg, coins):
+    def before_call_contract(self, contract=None, msg=None, coins=None, **kwargs):
         self.console.print(f'Calling contract: [bold magenta]{contract}[/]')
         self.console.print('Msg:')
         self.console.print(msg)
@@ -127,6 +130,9 @@ class RichPlugin(Plugin):
             self.console.print(f'Coins:\n  [green]{coins}')
         self.console.print()
 
-    def before_broadcast_tx(self, tx):
+    def before_broadcast_tx(self, **kwargs):
         self.console.print(f'Broadcasting tx...')
         self.console.print()
+
+    def wait_for_next_block(self, **kwargs):
+        self.console.print('Waiting for next block...')

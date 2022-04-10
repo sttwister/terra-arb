@@ -2,14 +2,10 @@
 import asyncio
 
 import click as click
-from rich.traceback import install
 
 import config
 from plugins import plugin_manager
-
-
-# Nice pretty colored tracebacks
-install(show_locals=True)
+from utils import network
 
 
 async def run_loop():
@@ -23,8 +19,10 @@ async def run_loop():
 
     groups = strategy_manager.get_strategy_groups()
 
+    current_block = await network.get_current_block_height()
+
     while True:
-        plugin_manager.dispatch('loop_start')
+        plugin_manager.dispatch('loop_start', current_block=current_block)
 
         populate_wallet_cache = wallet.populate_cache()
         run_strategies = asyncio.gather(*(
@@ -33,13 +31,21 @@ async def run_loop():
 
         await asyncio.gather(populate_wallet_cache, run_strategies)
 
-        plugin_manager.dispatch('after_simulate')
+        plugin_manager.dispatch('after_scoring')
 
         if config.EXECUTE:
             for group in groups:
                 await group.execute()
 
-        await asyncio.sleep(config.SLEEP_INTERVAL)
+        plugin_manager.dispatch('wait_for_next_block')
+
+        # Wait for the next block
+        new_block = await network.get_current_block_height()
+        while new_block <= current_block:
+            await asyncio.sleep(0.1)  # 100 ms
+            new_block = await network.get_current_block_height()
+
+        current_block = new_block
 
 
 @click.command()
