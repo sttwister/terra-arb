@@ -1,5 +1,6 @@
 import config
 from protocols import protocol_manager
+from strategies import ArbitrageStrategy
 from strategies.base import Strategy
 from utils import network
 from utils.wallet import wallet
@@ -8,21 +9,19 @@ from utils.wallet import wallet
 prism = protocol_manager.get_protocol('prism')
 
 
-class RefractLunaStrategy(Strategy):
-    protocol = prism
+class RefractLunaStrategy(ArbitrageStrategy):
     name = 'LUNA -> (pLUNA + yLUNA)'
-    requires = ['LUNA']
+
+    protocol = prism
+    from_token = 'LUNA'
+    to_token = 'cLUNA'  # This is not technically correct, but this is a required field by ArbitrageStrategy
 
     threshold = 4
 
     async def get_score(self):
-        if config.USE_WALLET_FOR_SIMULATE:
-            amount = await wallet.get('LUNA')
-        else:
-            amount = 10 ** 6
+        amount = await self.get_amount()
 
-        # At least 0.001 LUNA
-        if not amount or amount < 1000:
+        if not amount:
             return 0
 
         luna_to_pluna = await prism.simulate_swap('LUNA', 'pLUNA', amount)

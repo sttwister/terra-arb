@@ -12,6 +12,7 @@ class ArbitrageStrategy(Strategy):
     The score is equal to the profit of the swap.
     """
     threshold = 3
+    min_amount = 0.01
 
     protocol = None
     from_token = None
@@ -30,12 +31,19 @@ class ArbitrageStrategy(Strategy):
     async def get_exchange_rate(self):
         return 1
 
-    async def get_score(self):
+    async def get_amount(self):
         # Check whether to use real amounts from the wallet, or just simulate the price with 1 token
         if config.USE_WALLET_FOR_SIMULATE:
             amount = await wallet.get(self.from_token)
+            if not amount or amount < self.min_amount * 10 ** 6:
+                return 0
         else:
             amount = 10 ** 6
+
+        return amount
+
+    async def get_score(self):
+        amount = await self.get_amount()
 
         if not amount:
             return 0
@@ -59,7 +67,7 @@ class ArbitrageStrategy(Strategy):
     async def execute(self):
         amount = await wallet.get(self.from_token)
 
-        if not amount:
+        if not amount or amount < self.min_amount * 10 ** 6:
             return
 
         await self.protocol.swap(self.from_token, self.to_token, amount)
