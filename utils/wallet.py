@@ -93,6 +93,21 @@ class Wallet:
 
         return response
 
+    async def query_contract_at_height(self, contract_address, query, height):
+        import base64
+        import json
+        params = {
+            "query_msg": base64.b64encode(json.dumps(query).encode("utf-8")).decode(
+                "utf-8"
+            )
+        }
+        if height:
+            params['height'] = height
+        res = await wallet.wallet.lcd.wasm._c._get(
+            f"/terra/wasm/v1beta1/contracts/{contract_address}/store", params
+        )
+        return res.get("query_result")
+
     async def call_contract_with_token(self, contract, msg, token, amount):
         token_contract = network.TOKENS[token]
         send_msg = {
