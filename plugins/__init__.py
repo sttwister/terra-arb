@@ -1,3 +1,5 @@
+import asyncio
+
 from autodiscover import AutoDiscover
 from pathlib import Path
 
@@ -20,11 +22,14 @@ class PluginManager:
     def activate(self, plugin_id):
         self.enabled_plugins.append(self.registry[plugin_id]())
 
-    def dispatch(self, event, *args, **kwargs):
+    async def dispatch(self, event, *args, **kwargs):
         for plugin in self.enabled_plugins:
             method = getattr(plugin, event, None)
             if method:
-                method(*args, **kwargs)
+                if asyncio.iscoroutinefunction(method):
+                    await method(*args, **kwargs)
+                else:
+                    method(*args, **kwargs)
 
 
 plugin_manager = PluginManager()

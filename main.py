@@ -13,14 +13,14 @@ async def run_loop():
     from strategies import strategy_manager
     from utils.wallet import wallet
 
-    plugin_manager.dispatch('init')
+    await plugin_manager.dispatch('init')
 
     groups = strategy_manager.get_strategy_groups()
 
     current_block = await network.get_current_block_height()
 
     while True:
-        plugin_manager.dispatch('loop_start', current_block=current_block)
+        await plugin_manager.dispatch('loop_start', current_block=current_block)
 
         populate_wallet_cache = wallet.populate_cache()
         run_strategies = asyncio.gather(*(
@@ -29,13 +29,13 @@ async def run_loop():
 
         await asyncio.gather(populate_wallet_cache, run_strategies)
 
-        plugin_manager.dispatch('after_scoring')
+        await plugin_manager.dispatch('after_scoring')
 
         if config.EXECUTE:
             for group in groups:
                 await group.execute()
 
-        plugin_manager.dispatch('wait_for_next_block')
+        await plugin_manager.dispatch('wait_for_next_block')
 
         # Wait for the next block
         new_block = await network.get_current_block_height()

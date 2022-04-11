@@ -20,6 +20,7 @@ ENABLED_STRATEGY_GROUPS = [
 ]
 ACTIVE_PLUGINS = [
     'rich',
+    'web'
 ]
 
 EXECUTE = bool(env('EXECUTE', False))

@@ -85,11 +85,11 @@ class Wallet:
     #
 
     async def query_contract(self, contract, msg):
-        plugin_manager.dispatch('before_query_contract', contract=contract, msg=msg)
+        await plugin_manager.dispatch('before_query_contract', contract=contract, msg=msg)
 
         response = await network.lcd.wasm.contract_query(contract, msg)
 
-        plugin_manager.dispatch('after_query_contract', contract=contract, msg=msg, response=response)
+        await plugin_manager.dispatch('after_query_contract', contract=contract, msg=msg, response=response)
 
         return response
 
@@ -121,7 +121,7 @@ class Wallet:
         return await self.call_contract(token_contract, send_msg)
 
     async def call_contract(self, contract, msg, coins=Coins()):
-        plugin_manager.dispatch('before_call_contract', contract=contract, msg=msg, coins=coins)
+        await plugin_manager.dispatch('before_call_contract', contract=contract, msg=msg, coins=coins)
 
         execute_msg = MsgExecuteContract(
             sender=self.address,
@@ -142,7 +142,7 @@ class Wallet:
             CreateTxOptions(msgs=msgs)
         )
 
-        plugin_manager.dispatch('before_broadcast_tx', tx=tx)
+        await plugin_manager.dispatch('before_broadcast_tx', tx=tx)
 
         result = await network.lcd.tx.broadcast(tx)
 
@@ -164,8 +164,8 @@ class Wallet:
         for call in contract_calls:
             coins = call.get('coins', Coins())
 
-            plugin_manager.dispatch('before_call_contract',
-                                    contract=call['contract'], msg=call['msg'], coins=coins)
+            await plugin_manager.dispatch('before_call_contract',
+                                          contract=call['contract'], msg=call['msg'], coins=coins)
 
             msgs.append(
                 MsgExecuteContract(
