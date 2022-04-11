@@ -23,6 +23,7 @@ class RichPlugin(Plugin):
 
     config_keys = [
         'EXECUTE',
+        'BROADCAST_TX',
         'USE_WALLET_FOR_SIMULATE',
     ]
 

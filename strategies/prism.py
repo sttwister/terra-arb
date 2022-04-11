@@ -1,4 +1,3 @@
-import config
 from protocols import protocol_manager
 from strategies import ArbitrageStrategy
 from strategies.base import Strategy

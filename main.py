@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import asyncio
 
-import click as click
-
 import config
 from plugins import plugin_manager
 from utils import network
@@ -48,7 +46,6 @@ async def run_loop():
         current_block = new_block
 
 
-@click.command()
 def main():
     for plugin in config.ACTIVE_PLUGINS:
         plugin_manager.activate(plugin)
