@@ -18,6 +18,9 @@ class RefractLunaStrategy(ArbitrageStrategy):
 
     threshold = 4
 
+    def get_name(self):
+        return self.name
+
     async def get_score(self):
         amount = await self.get_amount()
 
