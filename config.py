@@ -19,7 +19,7 @@ ENABLED_STRATEGY_GROUPS = [
     'luna_withdraw',
 ]
 ACTIVE_PLUGINS = [
-    'rich',
+    'console',
     'web'
 ]
 

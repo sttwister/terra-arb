@@ -15,11 +15,11 @@ from utils.wallet import wallet
 
 
 @plugin_manager.register
-class RichPlugin(Plugin):
+class ConsolePlugin(Plugin):
     """
     Plugin that provides nicely formatted table output in the console.
     """
-    id = 'rich'
+    id = 'console'
 
     depends_on = ['history']
 
