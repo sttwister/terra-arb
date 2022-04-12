@@ -18,9 +18,9 @@ class TerraNetwork:
 
         self.lcd = AsyncLCDClient(chain_id=self.chain_id, url=self.url)
 
-    async def get_current_block_height(self):
+    async def get_current_block(self):
         block = await network.lcd.tendermint.block_info()
-        return block['block']['header']['height']
+        return block['block']['header']
 
 
 class Mainnet(TerraNetwork):

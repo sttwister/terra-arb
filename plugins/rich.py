@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from rich.columns import Columns
 from rich.console import Console
@@ -8,6 +9,7 @@ import config
 from plugins import plugin_manager
 from plugins.base import Plugin
 from strategies import strategy_manager
+from strategies.runner import strategy_runner
 from utils import network
 from utils.wallet import wallet
 
@@ -134,6 +136,12 @@ class RichPlugin(Plugin):
 
         for token, balance in wallet.get_summary():
             wallet_table.add_row(token, balance)
+
+        # Remove last 3 digits from microseconds to get miliseconds
+        block_time = datetime.strftime(strategy_runner.current_block_time, "%d.%m.%Y %H:%M:%S.%f")[:-3]
+        self.console.print(f'Current block: [bold green]{strategy_runner.current_block_height}[/]')
+        self.console.print(f'Current block time: [bold yellow]{block_time} UTC[/]')
+        self.console.print()
 
         self.console.print(wallet_table)
         self.console.print()
