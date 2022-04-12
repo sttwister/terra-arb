@@ -19,6 +19,8 @@ class RichPlugin(Plugin):
     """
     id = 'rich'
 
+    depends_on = ['history']
+
     header_style = 'bold magenta'
 
     config_keys = [
@@ -49,7 +51,7 @@ class RichPlugin(Plugin):
         self.console.print(f'LCD URL: [bold magenta]{network.lcd.url}[/]')
         self.console.print()
 
-        plugins = ','.join('[bold magenta]{}[/]'.format(plugin) for plugin in config.ACTIVE_PLUGINS)
+        plugins = ', '.join('[bold magenta]{}[/]'.format(plugin) for plugin in config.ACTIVE_PLUGINS)
         self.console.print(f'[underline]Active plugins[/]: {plugins}')
         self.console.print()
 
@@ -67,8 +69,10 @@ class RichPlugin(Plugin):
         self.start_time = time.time()
 
     def after_scoring(self, **kwargs):
+        history = plugin_manager.get_plugin('history')
         self.console.clear()
 
+        # Create a table for each strategy group
         tables = []
         for group in strategy_manager.get_strategy_groups():
             table = Table(title=group.name, header_style=self.header_style)
@@ -79,30 +83,51 @@ class RichPlugin(Plugin):
             table.add_column('Max', justify='right')
             table.add_column('Score', justify='right')
 
-            summary = group.get_summary()
-            for strategy_summary in summary:
-                row = (
-                    strategy_summary['protocol_name'],
-                    strategy_summary['name'],
-                    '%.2f' % strategy_summary['min'],
-                    '%.2f' % strategy_summary['max'],
-                    '%.2f' % strategy_summary['score'],
-                )
+            rows = []
+
+            for strategy in group.strategies:
+                min = history.min(strategy)
+                max = history.max(strategy)
+                score = group.last_run[strategy]
 
                 row_options = {}
-                if strategy_summary['score'] < 0:
+                if score < 0:
                     row_options['style'] = 'dim'
-                elif strategy_summary['score'] == strategy_summary['min'] != strategy_summary['max']:
-                    row_options['style'] = 'dim red'
-                elif strategy_summary['score'] == strategy_summary['max'] != strategy_summary['min']:
-                    row_options['style'] = 'dim yellow'
-                elif strategy_summary['score'] > strategy_summary['strategy'].threshold:
+                elif score == min != max:
+                    # New minimum
+                    row_options['style'] = 'red'
+                elif score == max != min:
+                    # New maximum
                     row_options['style'] = 'green'
+                elif score > strategy.threshold:
+                    # Over threshold
+                    row_options['style'] = 'bold'
 
-                table.add_row(*row, **row_options)
+                rows.append({
+                    'protocol': strategy.protocol.get_name() if hasattr(strategy.protocol, 'get_name') else '',
+                    'name': strategy.get_name(),
+                    'min': min,
+                    'max': max,
+                    'score': score,
+                    'row_options': row_options,
+                })
+
+            # Sort desc by score
+            rows.sort(key=lambda row: row['score'], reverse=True)
+
+            for row in rows:
+                table.add_row(
+                    row['protocol'],
+                    row['name'],
+                    '%.2f' % row['min'],
+                    '%.2f' % row['max'],
+                    '%.2f' % row['score'],
+                    **row['row_options']
+                )
 
             tables.append(table)
 
+        # Create a table with wallet balances
         wallet_table = Table(title='Wallet', header_style=self.header_style)
         wallet_table.add_column('Token', justify='left')
         wallet_table.add_column('Balance', justify='right')

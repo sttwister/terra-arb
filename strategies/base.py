@@ -45,22 +45,6 @@ class StrategyGroup:
             self.history[strategy]['min'] = min(self.history[strategy]['min'], score)
             self.history[strategy]['max'] = max(self.history[strategy]['max'], score)
 
-    def get_summary(self):
-        """
-        Returns a list of dicts, each containing information about a strategy.
-        """
-        return [
-            {
-                'strategy': strategy,
-                'protocol_name': strategy.protocol.get_name() if hasattr(strategy, 'protocol') else '',
-                'name': strategy.get_name(),
-                'score': score,
-                'min': self.history[strategy]['min'],
-                'max': self.history[strategy]['max'],
-            }
-            for strategy, score in self.last_run.items()
-        ]
-
     async def execute(self):
         scores = self.last_run
 

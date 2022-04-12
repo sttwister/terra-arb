@@ -48,7 +48,7 @@ async def run_loop():
 
 def main():
     for plugin in config.ACTIVE_PLUGINS:
-        plugin_manager.activate(plugin)
+        plugin_manager.enable(plugin)
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run_loop())

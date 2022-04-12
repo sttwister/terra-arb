@@ -1,4 +1,5 @@
 autodiscover==0.0.4
+networkx==2.8
 python-dotenv==0.20.0
 rich==12.2.0
 terra-sdk==2.0.5
