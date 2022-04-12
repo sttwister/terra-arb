@@ -5,12 +5,14 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+WORKDIR /app
+
 # Install pip requirements
-COPY requirements.txt .
+COPY requirements.txt /app/
 RUN pip install -r requirements.txt
 
 # Copy the app
-COPY . .
+COPY . /app/
 
 EXPOSE 8080
 
